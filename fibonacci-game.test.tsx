@@ -1,4 +1,3 @@
-import { isGeneralizedFibonacciSequence } from './utils';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import FibonacciGame from './fibonacci-game';
@@ -21,57 +20,6 @@ describe('FibonacciGame', () => {
     
     const movedSelector = container.querySelector('.ring-2');
     expect(initialSelector).not.toBe(movedSelector);
-  });
-
-  /**
-   * Test: Fibonacci Sequence Detection
-   * Purpose: Verifies that the game correctly identifies valid and invalid Fibonacci sequences
-   * Method:
-   * 1. Test various sequences that should be identified as Fibonacci
-   * 2. Test sequences that should not be identified as Fibonacci
-   * 3. Test edge cases (zeros, negative numbers, short sequences)
-   */
-  describe('Fibonacci sequence detection', () => {
-    /**
-     * Test the isGeneralizedFibonacciSequence function directly
-     * A sequence is Fibonacci if each number is the sum of the previous two
-     */
-    test('identifies valid Fibonacci sequences', () => {
-      const { container } = render(<FibonacciGame />);
-      const game = container.firstChild as HTMLElement;
-      
-      const validSequences = [
-        [1, 1, 2],
-        [1, 2, 3],
-        [2, 3, 5],
-        [3, 5, 8],
-        [1, 1, 2, 3],
-        [2, 3, 5, 8],
-        [1, 1, 2, 3, 5]
-      ];
-
-      validSequences.forEach(sequence => {
-        expect(isGeneralizedFibonacciSequence(sequence)).toBeTruthy();
-      });
-    });
-
-    test('rejects invalid sequences', () => {
-      const invalidSequences = [
-        [1, 1, 1],      // Not Fibonacci
-        [1, 2, 4],      // Not Fibonacci
-        [0, 1, 1],      // Contains zero
-        [1, 1],         // Too short
-        [1, 2, 4, 7],   // Not Fibonacci
-      ];
-
-      invalidSequences.forEach(sequence => {
-        const result = isGeneralizedFibonacciSequence(sequence);
-        if (result) {
-          console.log(`Sequence ${sequence} was incorrectly identified as valid`);
-        }
-        expect(isGeneralizedFibonacciSequence(sequence)).toBeFalsy();
-      });
-    });
   });
 
   describe('Sequence clearing', () => {

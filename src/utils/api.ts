@@ -1,12 +1,6 @@
-const API_URL = 'http://localhost:5001';
+import { FibonacciSequence } from '../types/game';
 
-export interface FibonacciSequence {
-  type: 'row' | 'column';
-  index: number;
-  start: number;
-  length: number;
-  values: number[];
-}
+const API_URL = 'http://localhost:5001';
 
 export async function analyzeGrid(grid: number[][]): Promise<FibonacciSequence[]> {
   try {

@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.cell-selector::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgb(249 115 22);
+  pointer-events: none;
+  z-index: 50;
+  transform: translate(0, 0);
+  clip-path: inset(-5px);
+} 
