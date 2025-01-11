@@ -12,7 +12,11 @@ const FibonacciGame = () => {
     settings,
     getCellBackground,
     setSettings,
-    isCalculatingPotential
+    isCalculatingPotential,
+    displayTime,
+    isStarted,
+    startGame,
+    resetGame
   } = useGameLogic();
 
   return (
@@ -89,6 +93,10 @@ const FibonacciGame = () => {
         settings={settings}
         onSettingsChange={setSettings}
         isCalculatingPotential={isCalculatingPotential}
+        displayTime={displayTime}
+        isStarted={isStarted}
+        onStartGame={startGame}
+        onResetGame={resetGame}
       />
     </div>
   );

@@ -24,4 +24,11 @@ export interface FibonacciSequence {
   start: number;
   length: number;
   values: number[];
+}
+
+export interface GameState {
+  grid: number[][];
+  startTime: number | null;
+  elapsedTime: number;
+  isStarted: boolean;
 } 

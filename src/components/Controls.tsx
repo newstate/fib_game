@@ -6,13 +6,21 @@ interface ControlsProps {
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
   isCalculatingPotential: boolean;
+  displayTime: string;
+  isStarted: boolean;
+  onStartGame: () => void;
+  onResetGame: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({ 
   clearedPercentage, 
   settings, 
   onSettingsChange,
-  isCalculatingPotential 
+  isCalculatingPotential,
+  displayTime,
+  isStarted,
+  onStartGame,
+  onResetGame
 }) => {
   const [dots, setDots] = useState('');
 
@@ -32,10 +40,26 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-4xl font-bold">
-        Grid Cleared: {clearedPercentage}%
+      <button
+        onClick={isStarted ? onResetGame : onStartGame}
+        className={`
+          font-bold py-2 px-4 rounded
+          ${isStarted 
+            ? 'bg-red-500 hover:bg-red-600 text-white' 
+            : 'bg-green-500 hover:bg-green-600 text-white'
+          }
+        `}
+      >
+        <div className="flex items-center gap-2">
+          <span>{isStarted ? 'Reset Game' : 'Start Game'}</span>
+          <span className="text-sm text-gray-600">(or press Enter)</span>
+        </div>
+      </button>
+      <div className="text-4xl font-bold flex flex-col gap-2">
+        <div>Grid Cleared: {clearedPercentage}%</div>
+        <div>Time: {displayTime}</div>
       </div>
-      <div className="bg-white/90 p-4 rounded-lg shadow-md">
+      <div className="bg-white/90 p-4 rounded-lg shadow-md opacity-{isStarted ? '100' : '50'}">
         <details open>
           <summary className="text-xl font-bold mb-4 cursor-pointer">Controls</summary>
           <div className="flex flex-col gap-4">

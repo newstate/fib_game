@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Selector, GameSettings } from '../types/game';
+import { Selector, GameSettings, GameState } from '../types/game';
 import { analyzeGrid, analyzePotential } from '../utils/api';
 import {
   GRID_SIZE,
@@ -13,11 +13,24 @@ import {
   POTENTIAL_KEY
 } from '../constants/game';
 
+const GAME_STATE_KEY = 'fibonacciGameState';
+
 export const useGameLogic = () => {
-  const [grid, setGrid] = useState(() => 
-    Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0))
-  );
-  
+  // Load saved state from localStorage or use default
+  const loadInitialState = (): GameState => {
+    const savedState = localStorage.getItem(GAME_STATE_KEY);
+    if (savedState) {
+      return JSON.parse(savedState);
+    }
+    return {
+      grid: Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0)),
+      startTime: null,
+      elapsedTime: 0,
+      isStarted: false
+    };
+  };
+
+  const [gameState, setGameState] = useState<GameState>(loadInitialState);
   const [selector, setSelector] = useState<Selector>(() => ({
     row: Math.floor(Math.random() * GRID_SIZE),
     col: Math.floor(Math.random() * GRID_SIZE)
@@ -38,10 +51,68 @@ export const useGameLogic = () => {
   );
   const [isCalculatingPotential, setIsCalculatingPotential] = useState(false);
 
+  // Add timer logic
+  const [displayTime, setDisplayTime] = useState('00:00:00');
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
+  }, [gameState]);
+
+  const startGame = useCallback(() => {
+    if (!gameState.isStarted) {
+      setGameState(prev => ({
+        ...prev,
+        isStarted: true,
+        startTime: Date.now(),
+      }));
+    }
+  }, [gameState.isStarted]);
+
+  const resetGame = useCallback(() => {
+    const emptyGrid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0));
+    setGameState({
+      grid: emptyGrid,
+      startTime: null,
+      elapsedTime: 0,
+      isStarted: false
+    });
+    setDisplayTime('00:00:00');
+    setClearedPercentage(0);
+  }, []);
+
+  // Update the timer logic to store elapsed time when game stops
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (gameState.isStarted && gameState.startTime) {
+      intervalId = setInterval(() => {
+        const currentTime = Date.now();
+        const totalElapsed = gameState.elapsedTime + (currentTime - gameState.startTime!);
+        
+        const hours = Math.floor(totalElapsed / 3600000);
+        const minutes = Math.floor((totalElapsed % 3600000) / 60000);
+        const seconds = Math.floor((totalElapsed % 60000) / 1000);
+
+        setDisplayTime(
+          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        );
+
+        // Update elapsed time in game state
+        setGameState(prev => ({
+          ...prev,
+          elapsedTime: totalElapsed
+        }));
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [gameState.isStarted, gameState.startTime]);
+
   useEffect(() => {
     const updateBackgrounds = async () => {
       const newBackgrounds = Array(GRID_SIZE).fill('').map(() => Array(GRID_SIZE).fill(''));
-      const sequences = await analyzeGrid(grid);
+      const sequences = await analyzeGrid(gameState.grid);
       
       // Remove sub-sequences contained within longer sequences
       const filteredSequences = sequences.filter((seqA) => {
@@ -85,7 +156,7 @@ export const useGameLogic = () => {
     };
 
     updateBackgrounds();
-  }, [grid]);
+  }, [gameState.grid]);
 
   useEffect(() => {
     const updatePotentialHighlights = async () => {
@@ -95,13 +166,13 @@ export const useGameLogic = () => {
       }
       
       setIsCalculatingPotential(true);
-      const potentialMap = await analyzePotential(grid);
+      const potentialMap = await analyzePotential(gameState.grid);
       setPotentialHighlights(potentialMap);
       setIsCalculatingPotential(false);
     };
 
     updatePotentialHighlights();
-  }, [grid, settings.showPotential]);
+  }, [gameState.grid, settings.showPotential]);
 
   const checkSequences = useCallback(async (gridToCheck: number[][]) => {
     const sequences = await analyzeGrid(gridToCheck);
@@ -114,7 +185,27 @@ export const useGameLogic = () => {
     return Math.round((clearedCells / totalCells) * 100);
   }, []);
 
+  // Update grid through gameState
+  const updateGrid = useCallback((newGrid: number[][]) => {
+    setGameState(prev => ({
+      ...prev,
+      grid: newGrid
+    }));
+  }, []);
+
   const handleKeyboardLogic = useCallback(async (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (gameState.isStarted) {
+        resetGame();
+        return;
+      }
+      startGame();
+      return;
+    }
+
+    if (!gameState.isStarted) return;
+
     if (MOVEMENT_KEYS.includes(e.key)) {
       e.preventDefault();
       const moveAmount = e.shiftKey ? 5 : 1;
@@ -144,14 +235,14 @@ export const useGameLogic = () => {
     
     if (e.key.toLowerCase() === FIBONACCI_KEY) {
       e.preventDefault();
-      const newGrid = grid.map(row => [...row]);
+      const newGrid = gameState.grid.map(row => [...row]);
       
       // Increment row and column, but skip cleared cells
       for (let i = 0; i < GRID_SIZE; i++) {
-        if (newGrid[selector.row][i] !== -1) { // <-- skip increment if cleared
+        if (newGrid[selector.row][i] !== -1) {
           newGrid[selector.row][i]++;
         }
-        if (i !== selector.row && newGrid[i][selector.col] !== -1) { // <-- skip increment if cleared
+        if (i !== selector.row && newGrid[i][selector.col] !== -1) {
           newGrid[i][selector.col]++;
         }
       }
@@ -163,16 +254,16 @@ export const useGameLogic = () => {
       
       let sequencesCleared = 0;
       
-      // Clear 5-length sequences by marking them -1
+      // Clear 5-length sequences
       sortedSequences.forEach(seq => {
         if (seq.length === 5) {
           if (seq.type === 'row') {
             for (let i = seq.start; i < seq.start + seq.length; i++) {
-              newGrid[seq.index][i] = -1; // <-- mark cell as cleared
+              newGrid[seq.index][i] = -1;
             }
           } else {
             for (let i = seq.start; i < seq.start + seq.length; i++) {
-              newGrid[i][seq.index] = -1; // <-- mark cell as cleared
+              newGrid[i][seq.index] = -1;
             }
           }
           sequencesCleared++;
@@ -183,7 +274,7 @@ export const useGameLogic = () => {
         setClearedPercentage(calculateClearedPercentage(newGrid));
       }
       
-      setGrid(newGrid);
+      updateGrid(newGrid);
     }
 
     if (e.key.toLowerCase() === MAGNIFIER_KEY) {
@@ -223,7 +314,7 @@ export const useGameLogic = () => {
         showPotential: !prev.showPotential
       }));
     }
-  }, [grid, selector, checkSequences, setSettings]);
+  }, [gameState.isStarted, gameState.grid, selector, startGame, checkSequences, updateGrid]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardLogic);
@@ -254,7 +345,7 @@ export const useGameLogic = () => {
   }, [cellBackgrounds, potentialHighlights, settings.showHighlighting]);
 
   return {
-    grid,
+    grid: gameState.grid,
     selector,
     clearedPercentage,
     settings,
@@ -262,5 +353,9 @@ export const useGameLogic = () => {
     setSettings,
     getCellBackground,
     isCalculatingPotential,
+    displayTime,
+    isStarted: gameState.isStarted,
+    startGame,
+    resetGame
   };
 }; 
