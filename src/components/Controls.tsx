@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { GameSettings } from '../types/game';
 
 interface ControlsProps {
-  score: number;
+  clearedPercentage: number;
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
   isCalculatingPotential: boolean;
 }
 
 export const Controls: React.FC<ControlsProps> = ({ 
-  score, 
+  clearedPercentage, 
   settings, 
   onSettingsChange,
   isCalculatingPotential 
@@ -33,7 +33,7 @@ export const Controls: React.FC<ControlsProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="text-4xl font-bold">
-        Score: {score}
+        Grid Cleared: {clearedPercentage}%
       </div>
       <div className="bg-white/90 p-4 rounded-lg shadow-md">
         <details open>

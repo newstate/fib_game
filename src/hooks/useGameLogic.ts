@@ -23,7 +23,7 @@ export const useGameLogic = () => {
     col: Math.floor(Math.random() * GRID_SIZE)
   }));
   
-  const [score, setScore] = useState(0);
+  const [clearedPercentage, setClearedPercentage] = useState(0);
   const [cellBackgrounds, setCellBackgrounds] = useState<string[][]>(
     Array(GRID_SIZE).fill('').map(() => Array(GRID_SIZE).fill(''))
   );
@@ -108,6 +108,12 @@ export const useGameLogic = () => {
     return sequences;
   }, []);
 
+  const calculateClearedPercentage = useCallback((gridToCheck: number[][]) => {
+    const totalCells = GRID_SIZE * GRID_SIZE;
+    const clearedCells = gridToCheck.flat().filter(cell => cell === -1).length;
+    return Math.round((clearedCells / totalCells) * 100);
+  }, []);
+
   const handleKeyboardLogic = useCallback(async (e: KeyboardEvent) => {
     if (MOVEMENT_KEYS.includes(e.key)) {
       e.preventDefault();
@@ -174,7 +180,7 @@ export const useGameLogic = () => {
       });
       
       if (sequencesCleared > 0) {
-        setScore(s => s + sequencesCleared);
+        setClearedPercentage(calculateClearedPercentage(newGrid));
       }
       
       setGrid(newGrid);
@@ -250,7 +256,7 @@ export const useGameLogic = () => {
   return {
     grid,
     selector,
-    score,
+    clearedPercentage,
     settings,
     cellBackgrounds,
     setSettings,

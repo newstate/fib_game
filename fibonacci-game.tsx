@@ -8,7 +8,7 @@ const FibonacciGame = () => {
   const {
     grid,
     selector,
-    score,
+    clearedPercentage,
     settings,
     getCellBackground,
     setSettings,
@@ -85,7 +85,7 @@ const FibonacciGame = () => {
         )}
       </div>
       <Controls 
-        score={score}
+        clearedPercentage={clearedPercentage}
         settings={settings}
         onSettingsChange={setSettings}
         isCalculatingPotential={isCalculatingPotential}
