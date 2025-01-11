@@ -6,6 +6,7 @@ export interface Selector {
 export interface GameSettings {
   showMagnifier: boolean;
   showHighlighting: boolean;
+  showPotential: boolean;
   magnifierSize: number;
 }
 

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Selector, GameSettings } from '../types/game';
-import { analyzeGrid } from '../utils/api';
+import { analyzeGrid, analyzePotential } from '../utils/api';
 import {
   GRID_SIZE,
   MOVEMENT_KEYS,
@@ -9,7 +9,8 @@ import {
   HIGHLIGHT_KEY,
   INCREASE_MAGNIFIER_KEY,
   DECREASE_MAGNIFIER_KEY,
-  SEQUENCE_LENGTHS
+  SEQUENCE_LENGTHS,
+  POTENTIAL_KEY
 } from '../constants/game';
 
 export const useGameLogic = () => {
@@ -29,8 +30,13 @@ export const useGameLogic = () => {
   const [settings, setSettings] = useState<GameSettings>({
     showMagnifier: true,
     showHighlighting: true,
+    showPotential: false,
     magnifierSize: 9,
   });
+  const [potentialHighlights, setPotentialHighlights] = useState<number[][]>(
+    Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0))
+  );
+  const [isCalculatingPotential, setIsCalculatingPotential] = useState(false);
 
   useEffect(() => {
     const updateBackgrounds = async () => {
@@ -80,6 +86,22 @@ export const useGameLogic = () => {
 
     updateBackgrounds();
   }, [grid]);
+
+  useEffect(() => {
+    const updatePotentialHighlights = async () => {
+      if (!settings.showPotential) {
+        setPotentialHighlights(Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0)));
+        return;
+      }
+      
+      setIsCalculatingPotential(true);
+      const potentialMap = await analyzePotential(grid);
+      setPotentialHighlights(potentialMap);
+      setIsCalculatingPotential(false);
+    };
+
+    updatePotentialHighlights();
+  }, [grid, settings.showPotential]);
 
   const checkSequences = useCallback(async (gridToCheck: number[][]) => {
     const sequences = await analyzeGrid(gridToCheck);
@@ -187,12 +209,43 @@ export const useGameLogic = () => {
         return { ...prev, magnifierSize: newSize };
       });
     }
+
+    if (e.key.toLowerCase() === POTENTIAL_KEY) {
+      e.preventDefault();
+      setSettings(prev => ({
+        ...prev,
+        showPotential: !prev.showPotential
+      }));
+    }
   }, [grid, selector, checkSequences, setSettings]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardLogic);
     return () => window.removeEventListener('keydown', handleKeyboardLogic);
   }, [handleKeyboardLogic]);
+
+  const getCellBackground = useCallback((row: number, col: number) => {
+    if (!settings.showHighlighting) return '';
+    
+    // Show existing sequences in green
+    if (cellBackgrounds[row][col]) {
+      return cellBackgrounds[row][col];
+    }
+    
+    // Show potential clears in different shades of red
+    const potential = potentialHighlights[row][col];
+    if (potential > 0) {
+      // Use different shades of red based on potential clears
+      if (potential <= 10) return 'bg-red-200';      // Darkest red for 1-10
+      if (potential <= 20) return 'bg-red-300';
+      if (potential <= 30) return 'bg-red-400';
+      if (potential <= 40) return 'bg-red-500';
+      if (potential <= 50) return 'bg-red-600';
+      return 'bg-red-700';                           // Lightest red for 50+
+    }
+    
+    return '';
+  }, [cellBackgrounds, potentialHighlights, settings.showHighlighting]);
 
   return {
     grid,
@@ -201,8 +254,7 @@ export const useGameLogic = () => {
     settings,
     cellBackgrounds,
     setSettings,
-    getCellBackground: useCallback((row: number, col: number) => {
-      return settings.showHighlighting ? cellBackgrounds[row][col] : '';
-    }, [cellBackgrounds, settings.showHighlighting])
+    getCellBackground,
+    isCalculatingPotential,
   };
 }; 

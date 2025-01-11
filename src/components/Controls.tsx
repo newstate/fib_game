@@ -1,13 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameSettings } from '../types/game';
 
 interface ControlsProps {
   score: number;
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
+  isCalculatingPotential: boolean;
 }
 
-export const Controls: React.FC<ControlsProps> = ({ score, settings, onSettingsChange }) => {
+export const Controls: React.FC<ControlsProps> = ({ 
+  score, 
+  settings, 
+  onSettingsChange,
+  isCalculatingPotential 
+}) => {
+  const [dots, setDots] = useState('');
+
+  // Animation for loading dots
+  useEffect(() => {
+    if (!isCalculatingPotential) return;
+    
+    const interval = setInterval(() => {
+      setDots(prev => {
+        if (prev === '...') return '';
+        return prev + '.';
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [isCalculatingPotential]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="text-4xl font-bold">
@@ -51,11 +73,29 @@ export const Controls: React.FC<ControlsProps> = ({ score, settings, onSettingsC
                   />
                   <span>Show Sequence Highlighting (H)</span>
                 </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={settings.showPotential}
+                    onChange={(e) => onSettingsChange({
+                      ...settings,
+                      showPotential: e.target.checked
+                    })}
+                    className="w-4 h-4"
+                  />
+                  <span>Show Next Move Potential (C)</span>
+                  <span className="text-xs text-gray-500 italic">experimental feature</span>
+                </label>
               </div>
             </div>
           </div>
         </details>
       </div>
+      {isCalculatingPotential && (
+        <div className="text-left font-mono">
+          Calculating next move potential{dots}
+        </div>
+      )}
     </div>
   );
 }; 

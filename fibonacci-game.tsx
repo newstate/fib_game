@@ -11,7 +11,8 @@ const FibonacciGame = () => {
     score,
     settings,
     getCellBackground,
-    setSettings
+    setSettings,
+    isCalculatingPotential
   } = useGameLogic();
 
   return (
@@ -87,6 +88,7 @@ const FibonacciGame = () => {
         score={score}
         settings={settings}
         onSettingsChange={setSettings}
+        isCalculatingPotential={isCalculatingPotential}
       />
     </div>
   );

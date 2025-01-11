@@ -7,4 +7,5 @@ export const MAGNIFIER_KEY = 'm';
 export const HIGHLIGHT_KEY = 'h';
 export const INCREASE_MAGNIFIER_KEY = ']';
 export const DECREASE_MAGNIFIER_KEY = '[';
-export const SEQUENCE_LENGTHS = [3, 4, 5]; 
+export const SEQUENCE_LENGTHS = [3, 4, 5];
+export const POTENTIAL_KEY = 'c'; 
