@@ -16,10 +16,19 @@ export interface CustomImage {
   hint?: string;
 }
 
+var baseUrl = 'https://gcqowih89q0rcl2g.public.blob.vercel-storage.com/';
+
 export const CUSTOM_IMAGES: Record<string, CustomImage> = {
   default: {
     id: 'default',
-    url: '/path/to/default/image.jpg'
+    url: baseUrl + 'dontpanic.jpg'
+  },
+  frank: {
+    id: 'frank',
+    url: baseUrl + 'frank-69sEXFgMMqkTcxo9KM6CxNQl1y6SqM.JPG'
+  },
+  maurice: {
+    id: 'maurice',
+    url: baseUrl + 'maurice.png'
   }
-  // Add more images here
 }; 

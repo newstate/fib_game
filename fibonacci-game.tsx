@@ -32,7 +32,7 @@ const FibonacciGame = () => {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: 'url("images/dontpanic.jpg")',
+            backgroundImage: `url("${gameState.customImage.url}")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             zIndex: 0

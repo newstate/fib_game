@@ -47,13 +47,13 @@ export const useGameState = () => {
 
   const resetGame = useCallback(() => {
     const emptyGrid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0));
-    setGameState({
+    setGameState(prev => ({
       grid: emptyGrid,
       startTime: null,
       elapsedTime: 0,
       isStarted: false,
-      customImage: CUSTOM_IMAGES.default
-    });
+      customImage: prev.customImage
+    }));
     setDisplayTime('00:00:00');
     setClearedPercentage(0);
   }, []);

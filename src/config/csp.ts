@@ -2,7 +2,12 @@ const DEV_CSP_POLICY = {
   'default-src': ["*", "'unsafe-inline'", "'unsafe-eval'"],
   'script-src': ["*", "'unsafe-inline'", "'unsafe-eval'"],
   'style-src': ["*", "'unsafe-inline'"],
-  'img-src': ["*", 'data:', 'blob:'],
+  'img-src': [
+    "'self'", 
+    'data:', 
+    'blob:', 
+    'https://gcqowih89q0rcl2g.public.blob.vercel-storage.com/'
+  ],
   'font-src': ["*"],
   'connect-src': ["*"],
   'worker-src': ["*", 'blob:'],
@@ -20,7 +25,12 @@ const PROD_CSP_POLICY = {
     "https://*.onrender.com",
     "https://fibserver.onrender.com"
   ],
-  'img-src': ["'self'", "data:", "blob:"],
+  'img-src': [
+    "'self'", 
+    'data:', 
+    'blob:', 
+    'https://gcqowih89q0rcl2g.public.blob.vercel-storage.com/'
+  ],
   'frame-src': ["'none'"],
   'object-src': ["'none'"]
 };
