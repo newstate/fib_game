@@ -11,9 +11,11 @@ interface ControlsProps {
   isStarted: boolean;
   onStartGame: () => void;
   onResetGame: () => void;
+  children?: React.ReactNode;
 }
 
 export const Controls: React.FC<ControlsProps> = ({ 
+  children,
   clearedPercentage, 
   settings, 
   onSettingsChange,
@@ -65,7 +67,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <span className="text-sm text-gray-600">(or press Enter)</span>
         </div>
       </button>
-      {isStarted && <ShareGame isGameRunning={isStarted} />}
+      {children}
       <div className="text-4xl font-bold flex flex-col gap-2">
         {isStarted && (
           <>

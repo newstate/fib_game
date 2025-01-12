@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GRID_SIZE } from '../constants/game';
 import { CUSTOM_IMAGES, CustomImage } from '../constants/game';
+import { useGameContext } from '../context/GameContext';
 
 const GAME_STATE_KEY = 'fibonacciGameState';
 
@@ -13,6 +14,7 @@ interface GameState {
 }
 
 export const useGameState = () => {
+  const { isFormActive } = useGameContext();
   const loadInitialState = (): GameState => {
     const savedState = localStorage.getItem(GAME_STATE_KEY);
     if (savedState) {
@@ -62,7 +64,7 @@ export const useGameState = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
-    if (gameState.isStarted && gameState.startTime) {
+    if (gameState.isStarted && !isFormActive) {
       intervalId = setInterval(() => {
         const currentTime = Date.now();
         const totalElapsed = gameState.elapsedTime + (currentTime - gameState.startTime!);
@@ -83,7 +85,7 @@ export const useGameState = () => {
     }
 
     return () => clearInterval(intervalId);
-  }, [gameState.isStarted, gameState.startTime]);
+  }, [gameState.isStarted, gameState.startTime, isFormActive]);
 
   const updateGrid = useCallback((newGrid: number[][]) => {
     setGameState(prev => ({

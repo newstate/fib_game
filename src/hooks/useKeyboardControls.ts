@@ -11,6 +11,7 @@ import {
   GRID_SIZE
 } from '../constants/game';
 import { analyzeGrid } from '../utils/api';
+import { useGameContext } from '../context/GameContext';
 
 interface UseKeyboardControlsProps {
   gameState: GameState;
@@ -37,7 +38,17 @@ export const useKeyboardControls = ({
   setClearedPercentage,
   calculateClearedPercentage
 }: UseKeyboardControlsProps) => {
+  const { isFormActive } = useGameContext();
+
   const handleKeyboardLogic = useCallback(async (e: KeyboardEvent) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+
+    if (isFormActive) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       if (gameState.isStarted) {
@@ -162,11 +173,15 @@ export const useKeyboardControls = ({
     resetGame,
     updateGrid,
     setClearedPercentage,
-    calculateClearedPercentage
+    calculateClearedPercentage,
+    isFormActive
   ]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyboardLogic);
-    return () => window.removeEventListener('keydown', handleKeyboardLogic);
-  }, [handleKeyboardLogic]);
+    if (!isFormActive) {
+      document.addEventListener('keydown', handleKeyboardLogic);
+      return () => document.removeEventListener('keydown', handleKeyboardLogic);
+    }
+    return () => document.removeEventListener('keydown', handleKeyboardLogic);
+  }, [isFormActive, handleKeyboardLogic]);
 }; 

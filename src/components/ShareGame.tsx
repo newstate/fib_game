@@ -1,96 +1,134 @@
-import React, { useState } from 'react';
-import html2canvas from 'html2canvas';
+import React, { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
+import { useGameContext } from '../context/GameContext';
+import { CUSTOM_IMAGES } from '../constants/game';
 
 interface ShareGameProps {
   isGameRunning: boolean;
+  grid: number[][];
+  elapsedTime: number;
 }
 
-export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning }) => {
-  const [isCapturing, setIsCapturing] = useState(false);
+export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning, grid, elapsedTime }) => {
+  const [isSending, setIsSending] = useState(false);
+  const [userGuess, setUserGuess] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const { setIsFormActive } = useGameContext();
 
-  const handleShare = async () => {
-    if (isCapturing) return;
-    setIsCapturing(true);
+  // Initialize EmailJS when component mounts
+  useEffect(() => {
+    emailjs.init({
+      publicKey: "iH0uNE_PEsEvxWUxN",
+      blockHeadless: true,
+    });
+  }, []);
+
+  const handleShowForm = () => {
+    setShowForm(true);
+    setIsFormActive(true);  // Set form active immediately when showing
+  };
+
+  const handleHideForm = () => {
+    setShowForm(false);
+    setUserGuess('');  // Clear the input
+    setIsFormActive(false);  // Set form inactive immediately when hiding
+  };
+
+  const handleShare = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSending) return;
+    setIsSending(true);
 
     try {
-      const gameElement = document.getElementById('game-container');
-      if (!gameElement) {
-        throw new Error('Game container not found');
-      }
+      // Get the image ID from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const imageId = urlParams.get('image') || 'default';
+      
+      const gridState = grid.map(row => 
+        row.map(cell => cell === -1 ? 'x' : '0').join('')
+      ).join('|');
 
-      // Hide any UI elements you don't want in the screenshot
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      const hours = Math.floor(elapsedTime / 3600000);
+      const minutes = Math.floor((elapsedTime % 3600000) / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const timeString = `${hours}h ${minutes}m ${seconds}s`;
 
-      const canvas = await html2canvas(gameElement, {
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        scale: 2,
-        logging: false,
-        removeContainer: true,
-        ignoreElements: (element) => {
-          // Ignore the share button itself and any other UI elements you want to exclude
-          return element.classList.contains('share-button') || 
-                 element.classList.contains('controls-panel');
+      const result = await emailjs.send(
+        'service_cc12spg',
+        'template_9rqtu7j',
+        {
+          from_name: imageId,
+          to_name: 'Admin', // You can customize this if needed
+          message: `Guess: ${userGuess}\n\nCompletion Time: ${timeString}\n\nGrid State: ${gridState}`,
+          timestamp: new Date().toISOString()
         }
-      });
+      );
 
-      // Restore original body overflow
-      document.body.style.overflow = originalOverflow;
-
-      // Create blob
-      const blob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((b) => resolve(b!), 'image/png', 1.0);
-      });
-
-      // Create file
-      const file = new File([blob], 'game-progress.png', { type: 'image/png' });
-
-      // Download file
-      const downloadUrl = URL.createObjectURL(file);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = downloadUrl;
-      downloadLink.download = 'game-progress.png';
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(downloadUrl);
-
-      // Open email client
-      const subject = encodeURIComponent('I found the hidden image!');
-      const body = encodeURIComponent('I think the hidden image is: \n\nI\'ve attached my game progress.');
-      window.open(`mailto:gaspardbos@gmail.com?subject=${subject}&body=${body}`, '_self');
+      console.log('Success:', result.status, result.text);
+      alert('Thank you! Your game result has been sent successfully.');
+      handleHideForm();
 
     } catch (error) {
-      console.error('Error capturing game:', error);
-      alert('Failed to capture game state. Please try again.');
+      console.error('Error sending game result:', error);
+      alert('Failed to send game result. Please try again.');
     } finally {
-      setIsCapturing(false);
+      setIsSending(false);
     }
   };
 
   if (!isGameRunning) return null;
 
+  if (!showForm) {
+    return (
+      <button 
+        className="share-button font-bold py-2 px-4 rounded border-2 border-blue-500 bg-white text-blue-500 flex items-center gap-2"
+        onClick={handleShowForm}
+      >
+        I Recognized It! 
+        <span role="img" aria-label="smiley">😊</span>
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+        </svg>
+      </button>
+    );
+  }
+
   return (
-    <button 
-      className="share-button font-bold py-2 px-4 rounded border-2 border-blue-500 bg-white text-blue-500 flex items-center gap-2"
-      onClick={handleShare}
-      disabled={isCapturing}
+    <form 
+      onSubmit={handleShare}
+      className="bg-white p-4 rounded-lg shadow-md flex flex-col gap-4 max-w-md"
     >
-      {isCapturing ? (
-        "Capturing..."
-      ) : (
-        <>
-          "I Recognized It!" 
-          <span role="img" aria-label="smiley">😊</span>
-          Share Result
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-          </svg>
-        </>
-      )}
-    </button>
+      <div>
+        <label htmlFor="guess" className="block text-sm font-medium text-gray-700 mb-1">
+          What do you think the hidden image represents?
+        </label>
+        <textarea
+          id="guess"
+          value={userGuess}
+          onChange={(e) => setUserGuess(e.target.value)}
+          required
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          rows={3}
+          placeholder="Type your guess here..."
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={isSending}
+          className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300"
+        >
+          {isSending ? "Sending..." : "Submit"}
+        </button>
+        <button
+          type="button"
+          onClick={handleHideForm}
+          className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }; 
