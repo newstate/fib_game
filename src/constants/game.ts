@@ -8,4 +8,18 @@ export const HIGHLIGHT_KEY = 'h';
 export const INCREASE_MAGNIFIER_KEY = ']';
 export const DECREASE_MAGNIFIER_KEY = '[';
 export const SEQUENCE_LENGTHS = [3, 4, 5];
-export const POTENTIAL_KEY = 'c'; 
+export const POTENTIAL_KEY = 'c';
+
+export interface CustomImage {
+  id: string;
+  url: string;
+  hint?: string;
+}
+
+export const CUSTOM_IMAGES: Record<string, CustomImage> = {
+  default: {
+    id: 'default',
+    url: '/path/to/default/image.jpg'
+  }
+  // Add more images here
+}; 

@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GameState } from '../types/game';
 import { GRID_SIZE } from '../constants/game';
+import { CUSTOM_IMAGES, CustomImage } from '../constants/game';
 
 const GAME_STATE_KEY = 'fibonacciGameState';
+
+interface GameState {
+  grid: number[][];
+  startTime: number | null;
+  elapsedTime: number;
+  isStarted: boolean;
+  customImage: CustomImage;
+}
 
 export const useGameState = () => {
   const loadInitialState = (): GameState => {
@@ -14,7 +22,8 @@ export const useGameState = () => {
       grid: Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0)),
       startTime: null,
       elapsedTime: 0,
-      isStarted: false
+      isStarted: false,
+      customImage: CUSTOM_IMAGES.default
     };
   };
 
@@ -42,7 +51,8 @@ export const useGameState = () => {
       grid: emptyGrid,
       startTime: null,
       elapsedTime: 0,
-      isStarted: false
+      isStarted: false,
+      customImage: CUSTOM_IMAGES.default
     });
     setDisplayTime('00:00:00');
     setClearedPercentage(0);
@@ -86,6 +96,18 @@ export const useGameState = () => {
     const totalCells = GRID_SIZE * GRID_SIZE;
     const clearedCells = gridToCheck.flat().filter(cell => cell === -1).length;
     return Math.round((clearedCells / totalCells) * 100);
+  }, []);
+
+  useEffect(() => {
+    // Get image ID from URL params
+    const params = new URLSearchParams(window.location.search);
+    const imageId = params.get('image') || 'default';
+    
+    const selectedImage = CUSTOM_IMAGES[imageId] || CUSTOM_IMAGES.default;
+    setGameState(prev => ({
+      ...prev,
+      customImage: selectedImage
+    }));
   }, []);
 
   return {

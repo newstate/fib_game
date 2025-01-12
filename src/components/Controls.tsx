@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GameSettings } from '../types/game';
+import { ShareGame } from './ShareGame';
 
 interface ControlsProps {
   clearedPercentage: number;
@@ -55,6 +56,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <span className="text-sm text-gray-600">(or press Enter)</span>
         </div>
       </button>
+      {isStarted && <ShareGame isGameRunning={isStarted} />}
       <div className="text-4xl font-bold flex flex-col gap-2">
         <div>Grid Cleared: {clearedPercentage}%</div>
         <div>Time: {displayTime}</div>

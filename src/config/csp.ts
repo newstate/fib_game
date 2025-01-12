@@ -40,4 +40,12 @@ export const getCSPString = (isDev: boolean) => {
   return Object.entries(policy)
     .map(([key, values]) => `${key} ${values.join(' ')}`)
     .join('; ');
+};
+
+export const cspRules = {
+  directives: {
+    // existing directives...
+    "img-src": ["'self'", "data:", "blob:"],
+    "default-src": ["'self'", "mailto:"],
+  }
 }; 

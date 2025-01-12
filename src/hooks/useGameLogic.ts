@@ -50,6 +50,7 @@ export const useGameLogic = () => {
     displayTime,
     isStarted: gameState.isStarted,
     startGame,
-    resetGame
+    resetGame,
+    gameState
   };
 }; 

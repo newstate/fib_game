@@ -27,6 +27,7 @@
     "dev": "vite"
   },
   "dependencies": {
+    "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5"
   }
 }

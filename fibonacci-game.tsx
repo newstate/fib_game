@@ -3,6 +3,7 @@ import { Magnifier } from './src/components/Magnifier';
 import { Controls } from './src/components/Controls';
 import { useGameLogic } from './src/hooks/useGameLogic';
 import { GRID_SIZE } from './src/constants/game';
+import { ShareGame } from './src/components/ShareGame';
 
 const FibonacciGame = () => {
   const {
@@ -16,11 +17,12 @@ const FibonacciGame = () => {
     displayTime,
     isStarted,
     startGame,
-    resetGame
+    resetGame,
+    gameState
   } = useGameLogic();
 
   return (
-    <div
+    <div id="game-container"
       className="min-h-screen flex items-center justify-center gap-4 p-2"
       style={{
         backgroundColor: '#f5f5dc'
