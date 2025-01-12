@@ -82,7 +82,7 @@ export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning }) => {
         "Capturing..."
       ) : (
         <>
-          "I Found It!" 
+          "I Recognized It!" 
           <span role="img" aria-label="smiley">😊</span>
           Share Result
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">

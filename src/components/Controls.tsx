@@ -41,6 +41,15 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="bg-white/90 p-4 rounded-lg shadow-md">
+        <details open={!isStarted}>
+          <summary className="text-xl font-bold mb-4 cursor-pointer">How to Play</summary>
+          <p className="text-sm leading-relaxed">
+            Your goal is to form mathmatical sequences of 5 numbers in a row or column. This will clear the cells on the board and reveal a picture. The game ends once you have recognized the picture.
+          </p>
+        </details>
+      </div>
+      
       <button
         onClick={isStarted ? onResetGame : onStartGame}
         className={`
@@ -58,8 +67,12 @@ export const Controls: React.FC<ControlsProps> = ({
       </button>
       {isStarted && <ShareGame isGameRunning={isStarted} />}
       <div className="text-4xl font-bold flex flex-col gap-2">
-        <div>Grid Cleared: {clearedPercentage}%</div>
-        <div>Time: {displayTime}</div>
+        {isStarted && (
+          <>
+            <div>Grid Cleared: {clearedPercentage}%</div>
+            <div>Time: {displayTime}</div>
+          </>
+        )}
       </div>
       <div className="bg-white/90 p-4 rounded-lg shadow-md opacity-{isStarted ? '100' : '50'}">
         <details open>
@@ -67,6 +80,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2 text-sm">
               <h3 className="font-semibold">Movement</h3>
+              <p>Press 'F' to increment a row + column</p>
               <p>↑ ↓ ← → Arrow keys to move</p>
               <p>Hold Shift + arrows to move faster</p>
               <p>Press '[' or ']' to adjust Magnifier size</p>
