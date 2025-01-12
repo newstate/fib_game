@@ -1,13 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { getCSPString } from './src/config/csp';
 
 export default defineConfig(({ command, mode }) => ({
   plugins: [react()],
   server: {
-    headers: {
-      'Content-Security-Policy': getCSPString(mode === 'development'),
-    },
+    headers: {}
   },
   build: {
     sourcemap: true,
@@ -18,6 +15,6 @@ export default defineConfig(({ command, mode }) => ({
     }
   },
   optimizeDeps: {
-    exclude: ['js-cookie'] // Exclude problematic dependencies if any
+    exclude: ['js-cookie']
   }
 })); 

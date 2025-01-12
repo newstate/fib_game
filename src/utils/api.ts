@@ -1,6 +1,6 @@
 import { FibonacciSequence } from '../types/game';
 
-const API_URL = 'http://localhost:5001';
+const API_URL = 'https://fibserver.onrender.com';
 
 export async function analyzeGrid(grid: number[][]): Promise<FibonacciSequence[]> {
   try {
@@ -19,7 +19,7 @@ export async function analyzeGrid(grid: number[][]): Promise<FibonacciSequence[]
 
 export const analyzePotential = async (grid: number[][]): Promise<number[][]> => {
   try {
-    const response = await fetch('http://localhost:5001/analyze-potential', {
+    const response = await fetch(`${API_URL}/analyze-potential`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

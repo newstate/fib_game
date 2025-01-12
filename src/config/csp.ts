@@ -1,36 +1,26 @@
 const DEV_CSP_POLICY = {
-  'default-src': ["'self'"],
-  'script-src': [
-    "'self'",
-    "'unsafe-eval'",
-    "'unsafe-inline'",
-    "'wasm-unsafe-eval'",
-    // Vite 6 specific requirements
-    "http://localhost:*",
-    "ws://localhost:*",
-    // Add hash for specific inline scripts
-    "'sha256-*'"
-  ],
-  'style-src': ["'self'", "'unsafe-inline'"],
-  'img-src': ["'self'", 'data:', 'blob:'],
-  'font-src': ["'self'"],
-  'connect-src': [
-    "'self'",
-    "http://localhost:*",
-    "ws://localhost:*"
-  ],
-  'worker-src': ["'self'", 'blob:'],
-  // Remove restrictive policies during development
-  'frame-src': ["'self'"],
-  'object-src': ["'self'"]
+  'default-src': ["*", "'unsafe-inline'", "'unsafe-eval'"],
+  'script-src': ["*", "'unsafe-inline'", "'unsafe-eval'"],
+  'style-src': ["*", "'unsafe-inline'"],
+  'img-src': ["*", 'data:', 'blob:'],
+  'font-src': ["*"],
+  'connect-src': ["*"],
+  'worker-src': ["*", 'blob:'],
+  'frame-src': ["*"],
+  'object-src': ["*"]
 };
 
 const PROD_CSP_POLICY = {
   // Production CSP will be stricter
-  'default-src': ["'self'"],
-  'script-src': ["'self'"],
+  'default-src': ["'self'", "https://*.onrender.com"],
+  'script-src': ["'self'", "'unsafe-inline'"],
   'style-src': ["'self'", "'unsafe-inline'"],
-  'connect-src': ["'self'", 'http://localhost:5001'],
+  'connect-src': [
+    "'self'", 
+    "https://*.onrender.com",
+    "https://fibserver.onrender.com"
+  ],
+  'img-src': ["'self'", "data:", "blob:"],
   'frame-src': ["'none'"],
   'object-src': ["'none'"]
 };
