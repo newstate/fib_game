@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, 
@@ -114,4 +115,7 @@ def analyze_potential():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, host='localhost', port=5001) 
+    # Get port from environment variable or default to 5001
+    port = int(os.environ.get('PORT', 5001))
+    # Bind to 0.0.0.0 instead of localhost
+    app.run(debug=True, host='0.0.0.0', port=port) 
