@@ -21,6 +21,12 @@ export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning, grid, elaps
       publicKey: "iH0uNE_PEsEvxWUxN",
       blockHeadless: true,
     });
+
+    // Clean up form state when component unmounts
+    return () => {
+      setShowForm(false);
+      setIsFormActive(false);
+    };
   }, []);
 
   const handleShowForm = () => {
@@ -29,9 +35,12 @@ export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning, grid, elaps
   };
 
   const handleHideForm = () => {
-    setShowForm(false);
-    setUserGuess('');  // Clear the input
-    setIsFormActive(false);  // Set form inactive immediately when hiding
+    // Ensure state updates happen in the correct order
+    setIsFormActive(false);
+    setTimeout(() => {
+      setShowForm(false);
+      setUserGuess('');
+    }, 0);
   };
 
   const handleShare = async (e: React.FormEvent) => {
@@ -65,13 +74,18 @@ export const ShareGame: React.FC<ShareGameProps> = ({ isGameRunning, grid, elaps
       );
 
       console.log('Success:', result.status, result.text);
+      // Update state in correct order
+      setIsFormActive(false);
+      setTimeout(() => {
+        setShowForm(false);
+        setUserGuess('');
+        setIsSending(false);
+      }, 0);
+      
       alert('Thank you! Your game result has been sent successfully.');
-      handleHideForm();
-
     } catch (error) {
       console.error('Error sending game result:', error);
       alert('Failed to send game result. Please try again.');
-    } finally {
       setIsSending(false);
     }
   };
