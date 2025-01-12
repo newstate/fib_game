@@ -30,5 +30,29 @@ export const CUSTOM_IMAGES: Record<string, CustomImage> = {
   maurice: {
     id: 'maurice',
     url: baseUrl + 'maurice.png'
-  }
+  },
+  sander: {
+    id: 'sander',
+    url: baseUrl + 'sander.png'
+  },
+  milica: {
+    id: 'milica',
+    url: baseUrl + 'milica.jpg'
+  },
+  jonas: {
+    id: 'jonas',
+    url: baseUrl + 'jonas.jpg'
+  },
+  sylvia: {
+    id: 'sylvia',
+    url: baseUrl + 'sylvia.png'
+  },
+  kors: {
+    id: 'kors',
+    url: baseUrl + 'kors.png'
+  },
+  malou: {
+    id: 'malou',
+    url: baseUrl + 'malou.png'
+  },
 }; 
