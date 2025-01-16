@@ -57,8 +57,9 @@ def analyze_grid():
         grid = request.get_json()['grid']
         sequences = []
         
-        # Check rows
+        # Check rows (both directions)
         for row_idx, row in enumerate(grid):
+            # Left to right
             for start in range(len(row)-2):
                 for length in range(3, 6):
                     if start + length <= len(row):
@@ -69,12 +70,29 @@ def analyze_grid():
                                 'index': row_idx,
                                 'start': start,
                                 'length': length,
-                                'values': window
+                                'values': window,
+                                'direction': 'ltr'
+                            })
+            
+            # Right to left
+            for start in range(len(row)-1, 1, -1):
+                for length in range(3, 6):
+                    if start - length + 1 >= 0:
+                        window = row[start-length+1:start+1]
+                        if all(n > 0 for n in window) and is_fibonacci(window[::-1]):  # Check reversed window
+                            sequences.append({
+                                'type': 'row',
+                                'index': row_idx,
+                                'start': start-length+1,
+                                'length': length,
+                                'values': window,
+                                'direction': 'rtl'
                             })
         
-        # Check columns
+        # Check columns (both directions)
         for col_idx in range(len(grid[0])):
             column = [row[col_idx] for row in grid]
+            # Top to bottom
             for start in range(len(column)-2):
                 for length in range(3, 6):
                     if start + length <= len(column):
@@ -85,7 +103,23 @@ def analyze_grid():
                                 'index': col_idx,
                                 'start': start,
                                 'length': length,
-                                'values': window
+                                'values': window,
+                                'direction': 'ttb'
+                            })
+            
+            # Bottom to top
+            for start in range(len(column)-1, 1, -1):
+                for length in range(3, 6):
+                    if start - length + 1 >= 0:
+                        window = column[start-length+1:start+1]
+                        if all(n > 0 for n in window) and is_fibonacci(window[::-1]):  # Check reversed window
+                            sequences.append({
+                                'type': 'column',
+                                'index': col_idx,
+                                'start': start-length+1,
+                                'length': length,
+                                'values': window,
+                                'direction': 'btt'
                             })
         
         return jsonify({'sequences': sequences})
